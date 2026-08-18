@@ -13,8 +13,11 @@ Nothing to configure — the compose file has working defaults and the container
 seeds itself:
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose.local.yml up --build
 ```
+
+The default `docker-compose.yml` is the Dokploy/production stack, so local runs
+name the local file explicitly.
 
 Then open <http://localhost:8090/traveldoor> (public page) and
 <http://localhost:8090/admin> (sign in with `office@traveldoor.ge` /
@@ -26,15 +29,15 @@ Inside the container the app always listens on 8080.
 Useful commands:
 
 ```bash
-docker compose logs -f
+docker compose -f docker-compose.local.yml logs -f
 ```
 
 ```bash
-docker compose down
+docker compose -f docker-compose.local.yml down
 ```
 
 ```bash
-docker compose down -v
+docker compose -f docker-compose.local.yml down -v
 ```
 
 `down` keeps the database and uploads in named volumes; `down -v` deletes them
@@ -55,7 +58,7 @@ All optional, all `QR_`-prefixed so they cannot collide with the app's own
 | `QR_SEED_DEFAULT` | `true` | seed only when the profile is missing (`force` to re-import) |
 
 ```bash
-QR_HOST_PORT=9000 QR_BASE_URL=http://localhost:9000 docker compose up --build
+QR_HOST_PORT=9000 QR_BASE_URL=http://localhost:9000 docker compose -f docker-compose.local.yml up --build
 ```
 
 ### Scanning the QR from a phone
@@ -65,7 +68,7 @@ The QR encodes `BASE_URL/{slug}`, so a code generated with
 LAN address instead:
 
 ```bash
-QR_BASE_URL=http://192.168.1.50:8090 docker compose up -d
+QR_BASE_URL=http://192.168.1.50:8090 docker compose -f docker-compose.local.yml up -d
 ```
 
 Then regenerate the QR from the admin page and scan it from the same network.
@@ -131,14 +134,14 @@ a known password on a public admin is the risk worth closing first.
 
 ### Deploying with the Compose service type
 
-`docker-compose.dokploy.yml` is written for this path: no host port, attached
+`docker-compose.yml` — the repository default — is written for this path: no host port, attached
 to the external `dokploy-network`, with the Traefik routers, the TLS resolver
 and the http-to-https redirect already declared for
 `qrcode.binomargroup.com`.
 
 1. **Create Service → Compose** in your Dokploy project, pointing at this
    repository.
-2. Set the compose path to `docker-compose.dokploy.yml`.
+2. Leave **Compose Path** at its default, `./docker-compose.yml`.
 3. In the **Environment** tab set:
 
    ```
@@ -192,7 +195,7 @@ the canonical link and the Open Graph tags all still say `localhost`, which is
 the usual reason a tunnelled instance looks broken:
 
 ```bash
-QR_BASE_URL=https://your-name.trycloudflare.com QR_APP_ENV=production QR_SESSION_SECRET="$(openssl rand -base64 32)" docker compose up -d
+QR_BASE_URL=https://your-name.trycloudflare.com QR_APP_ENV=production QR_SESSION_SECRET="$(openssl rand -base64 32)" docker compose -f docker-compose.local.yml up -d
 ```
 
 `QR_APP_ENV=production` is right here because the tunnel terminates TLS: it
@@ -205,7 +208,7 @@ http.
 password is in this README, so it is public knowledge:
 
 ```bash
-docker compose exec app /app/app -set-password office@traveldoor.ge
+docker compose -f docker-compose.local.yml exec app /app/app -set-password office@traveldoor.ge
 ```
 
 It prompts on stdin; `-password <value>` is available for scripting but lands
@@ -305,7 +308,8 @@ templates/layouts|public|admin|partials/
 static/css|js/
 uploads/                     logo uploads (served from disk)
 Dockerfile                   two-stage static build, non-root runtime
-docker-compose.yml           local stack with named volumes for data and uploads
+docker-compose.yml           Dokploy/production stack (Traefik labels, no host port)
+docker-compose.local.yml     local development stack (host port 8090)
 ```
 
 ## Configuration
