@@ -1,0 +1,91 @@
+{{ define "link_list" }}
+<div id="link-list" class="link-admin">
+  {{ if .Error }}<p class="error" role="alert">{{ .Error }}</p>{{ end }}
+  {{ $pid := .ProfileID }}
+  {{ $csrf := .CSRFToken }}
+  {{ $types := .LinkTypes }}
+  <!-- Row edit forms live outside the table: a form element may not be a child
+       of tr, so each input references its form by id instead. -->
+  <div class="row-forms" hidden>
+    {{ range .Links }}
+    <form id="link-form-{{ .ID }}" method="post" action="/admin/links/{{ .ID }}"
+          hx-post="/admin/links/{{ .ID }}" hx-target="#link-list" hx-swap="outerHTML">
+      <input type="hidden" name="csrf_token" value="{{ $csrf }}">
+    </form>
+    {{ end }}
+  </div>
+  <table class="links-table">
+    <thead>
+      <tr><th scope="col">Order</th><th scope="col">Type</th><th scope="col">Label</th><th scope="col">Destination</th><th scope="col">Status</th><th scope="col">Actions</th></tr>
+    </thead>
+    <tbody>
+    {{ range .Links }}
+      <tr>
+        <td class="nowrap">
+          <form class="inline" method="post" action="/admin/profiles/{{ $pid }}/links/reorder"
+                hx-post="/admin/profiles/{{ $pid }}/links/reorder" hx-target="#link-list" hx-swap="outerHTML">
+            <input type="hidden" name="csrf_token" value="{{ $csrf }}">
+            <input type="hidden" name="id" value="{{ .ID }}">
+            <button class="icon-button" type="submit" name="direction" value="up" aria-label="Move {{ .Label }} up">&uarr;</button>
+            <button class="icon-button" type="submit" name="direction" value="down" aria-label="Move {{ .Label }} down">&darr;</button>
+          </form>
+        </td>
+        <td>
+          <label class="sr-only" for="type-{{ .ID }}">Link type</label>
+          <select id="type-{{ .ID }}" name="type" form="link-form-{{ .ID }}">
+            {{ $current := .Type }}
+            {{ range $types }}<option value="{{ .Key }}"{{ if eq .Key $current }} selected{{ end }}>{{ .Label }}</option>{{ end }}
+          </select>
+        </td>
+        <td>
+          <label class="sr-only" for="label-{{ .ID }}">Label</label>
+          <input id="label-{{ .ID }}" name="label" form="link-form-{{ .ID }}" value="{{ .Label }}">
+        </td>
+        <td>
+          <label class="sr-only" for="url-{{ .ID }}">Destination</label>
+          <input id="url-{{ .ID }}" name="url" form="link-form-{{ .ID }}" value="{{ .URL }}" size="34">
+        </td>
+        <td class="nowrap">
+          <label class="check">
+            <input type="checkbox" name="enabled" value="1" form="link-form-{{ .ID }}"{{ if .Enabled }} checked{{ end }}>
+            Enabled
+          </label>
+        </td>
+        <td class="nowrap">
+          <button type="submit" form="link-form-{{ .ID }}">Save</button>
+          <form class="inline" method="post" action="/admin/links/{{ .ID }}/delete"
+                hx-post="/admin/links/{{ .ID }}/delete" hx-target="#link-list" hx-swap="outerHTML"
+                hx-confirm="Delete this link?">
+            <input type="hidden" name="csrf_token" value="{{ $csrf }}">
+            <button class="danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {{ else }}
+      <tr><td colspan="6" class="empty">No links yet.</td></tr>
+    {{ end }}
+    </tbody>
+  </table>
+
+  <h3>Add a link</h3>
+  <form class="link-add" method="post" action="/admin/profiles/{{ $pid }}/links"
+        hx-post="/admin/profiles/{{ $pid }}/links" hx-target="#link-list" hx-swap="outerHTML">
+    <input type="hidden" name="csrf_token" value="{{ $csrf }}">
+    <div class="field">
+      <label for="new-type">Type</label>
+      <select id="new-type" name="type">
+        {{ range $types }}<option value="{{ .Key }}">{{ .Label }}</option>{{ end }}
+      </select>
+    </div>
+    <div class="field">
+      <label for="new-label">Label</label>
+      <input id="new-label" name="label" placeholder="Shown on the button">
+    </div>
+    <div class="field grow">
+      <label for="new-url">Destination</label>
+      <input id="new-url" name="url" required placeholder="https://example.com or +995 5xx xx xx xx">
+    </div>
+    <button type="submit">Add link</button>
+  </form>
+</div>
+{{ end }}

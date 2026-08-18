@@ -1,0 +1,40 @@
+{{ define "content" }}
+{{ $p := .Profile }}
+<header class="profile-head">
+  {{ if $p.LogoPath }}
+    <img class="logo" src="{{ $p.LogoPath }}" alt="{{ $p.Name }} logo">
+  {{ else }}
+    <div class="logo logo-fallback" aria-hidden="true">{{ initial $p.Name }}</div>
+  {{ end }}
+  <h1>{{ $p.Name }}</h1>
+  {{ if $p.Subtitle }}<p class="subtitle">{{ $p.Subtitle }}</p>{{ end }}
+  {{ if $p.Description }}<p class="description">{{ $p.Description }}</p>{{ end }}
+</header>
+
+<nav class="links" aria-label="Links">
+  {{ range .Links }}
+    <a class="link link-{{ .Type }}" href="{{ .Href | safeURL }}"{{ if isExternal .Href }} target="_blank" rel="noopener noreferrer"{{ end }}>
+      {{ template "icon" .Type }}
+      <span class="link-label">{{ .Label }}</span>
+    </a>
+  {{ else }}
+    <p class="empty">No links have been published yet.</p>
+  {{ end }}
+</nav>
+
+<footer class="profile-foot">
+  <div class="foot-actions">
+    <a class="secondary" href="/{{ $p.Slug }}/contact.vcf">
+      {{ template "icon" "save" }}
+      <span>Save contact</span>
+    </a>
+    <button class="secondary outline" type="button" id="share-button" hidden
+            data-share-url="{{ .PublicURL }}" data-share-title="{{ $p.Name }}">
+      {{ template "icon" "share" }}
+      <span>Share link</span>
+    </button>
+  </div>
+  <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
+  {{ if $p.Address }}<p class="address">{{ $p.Address }}</p>{{ end }}
+</footer>
+{{ end }}

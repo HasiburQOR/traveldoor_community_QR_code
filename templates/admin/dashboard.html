@@ -1,0 +1,27 @@
+{{ define "content" }}
+<div class="page-head">
+  <h1>Profiles</h1>
+  <a class="button" href="/admin/profiles/new">New profile</a>
+</div>
+<section class="panel">
+  <table class="links-table">
+    <thead>
+      <tr><th scope="col">Name</th><th scope="col">Slug</th><th scope="col">Status</th><th scope="col">Views</th><th scope="col">Clicks</th><th scope="col"></th></tr>
+    </thead>
+    <tbody>
+    {{ range .Profiles }}
+      <tr>
+        <td>{{ .Name }}</td>
+        <td><a href="/{{ .Slug }}">/{{ .Slug }}</a></td>
+        <td>{{ if .Published }}<span class="badge live">Published</span>{{ else }}<span class="badge">Draft</span>{{ end }}</td>
+        <td>{{ .Views }}</td>
+        <td>{{ .Clicks }}</td>
+        <td><a href="/admin/profiles/{{ .ID }}">Edit</a></td>
+      </tr>
+    {{ else }}
+      <tr><td colspan="6" class="empty">No profiles yet.</td></tr>
+    {{ end }}
+    </tbody>
+  </table>
+</section>
+{{ end }}

@@ -1,0 +1,24 @@
+{
+  "slug": "traveldoor",
+  "name": "Travel Door",
+  "subtitle": "Join Our Traveldoor Georgian Community",
+  "description": "Tours, travel planning and destination expertise across Georgia. Follow us, message us, or get in touch directly.",
+  "phone": "+995591177208",
+  "email": "office@traveldoor.ge",
+  "website": "https://traveldoor.ge",
+  "address": "",
+  "logo_file": "traveldoor-logo.webp",
+  "published": true,
+  "links": [
+    { "type": "facebook",  "label": "Facebook",   "url": "https://www.facebook.com/Traveldoorgeorgia" },
+    { "type": "instagram", "label": "Instagram",  "url": "https://www.instagram.com/traveldoorgeorgia/" },
+    { "type": "tiktok",    "label": "TikTok",     "url": "https://www.tiktok.com/@travel_door" },
+    { "type": "youtube",   "label": "YouTube",    "url": "https://www.youtube.com/@traveldoorge" },
+    { "type": "linkedin",  "label": "LinkedIn",   "url": "https://www.linkedin.com/company/travel-door-georgia" },
+    { "type": "x",         "label": "X (Twitter)","url": "https://x.com/TraveldoorGe" },
+    { "type": "website",   "label": "Website",    "url": "https://traveldoor.ge" },
+    { "type": "email",     "label": "Email us",   "url": "office@traveldoor.ge" },
+    { "type": "phone",     "label": "Call us",    "url": "+995 591 17 72 08" },
+    { "type": "whatsapp",  "label": "WhatsApp",   "url": "+995 591 17 72 08" }
+  ]
+}

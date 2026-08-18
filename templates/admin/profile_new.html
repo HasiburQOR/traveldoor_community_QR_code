@@ -1,0 +1,11 @@
+{{ define "content" }}
+<div class="page-head"><h1>New profile</h1><a class="button ghost" href="/admin">Back</a></div>
+<section class="panel narrow">
+  {{ if .Errors }}<ul class="error" role="alert">{{ range .Errors }}<li>{{ . }}</li>{{ end }}</ul>{{ end }}
+  <form method="post" action="/admin/profiles">
+    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+    {{ template "profile_fields" . }}
+    <button type="submit">Create profile</button>
+  </form>
+</section>
+{{ end }}

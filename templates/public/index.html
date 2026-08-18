@@ -1,0 +1,13 @@
+{{ define "content" }}
+<header class="profile-head">
+  <h1>Profiles</h1>
+  <p class="subtitle">Published business profiles.</p>
+</header>
+<nav class="links" aria-label="Profiles">
+  {{ range .Profiles }}
+    <a class="link" href="/{{ .Slug }}"><span class="link-label">{{ .Name }}</span></a>
+  {{ else }}
+    <p class="empty">Nothing published yet.</p>
+  {{ end }}
+</nav>
+{{ end }}

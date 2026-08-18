@@ -1,0 +1,11 @@
+# Keep the build context small and free of local state and secrets.
+.git
+.env
+data/
+uploads/*
+!uploads/.gitkeep
+*.exe
+*.exe~
+app
+*.docx
+README_STARTER.md

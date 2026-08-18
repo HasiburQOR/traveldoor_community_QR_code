@@ -1,0 +1,9 @@
+/data/
+/uploads/*
+!/uploads/.gitkeep
+.env
+*.exe
+app
+
+# Generated QR exports
+/qr/

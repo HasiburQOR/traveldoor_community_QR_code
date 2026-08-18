@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Title }} · Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/static/css/app.css?v={{ .AssetVersion }}">
+<script src="/static/js/htmx.min.js?v={{ .AssetVersion }}" defer></script>
+<script src="/static/js/admin.js?v={{ .AssetVersion }}" defer></script>
+</head>
+<body class="admin" hx-headers='{"X-CSRF-Token": "{{ .CSRFToken }}"}'>
+<header class="topbar">
+  <a class="brand" href="/admin">QR Profile Admin</a>
+  {{ with .User }}
+  <form class="inline" method="post" action="/admin/logout">
+    <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+    <a class="who" href="/admin/account">{{ .Email }}</a>
+    <button class="link-button" type="submit">Sign out</button>
+  </form>
+  {{ end }}
+</header>
+<main class="wrap">
+  {{ template "content" . }}
+</main>
+</body>
+</html>

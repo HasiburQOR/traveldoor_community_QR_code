@@ -1,0 +1,31 @@
+# Local testing: `docker compose up --build` needs no extra configuration.
+#
+# The QR_* names are deliberate — Compose also reads this directory's .env for
+# variable substitution, and the app's own keys (BASE_URL, ADDR, …) live there
+# for `go run`. Prefixing keeps the two from colliding.
+services:
+  app:
+    build: .
+    image: qr-social-profile:local
+    container_name: qr-profile
+    ports:
+      # Host 8090 by default because 8080 is often already taken.
+      - "${QR_HOST_PORT:-8090}:8080"
+    environment:
+      APP_ENV: ${QR_APP_ENV:-development}
+      # Must match how the browser reaches the app: every QR encodes
+      # BASE_URL/{slug}. Use your LAN IP to scan from a phone.
+      BASE_URL: ${QR_BASE_URL:-http://localhost:8090}
+      SESSION_SECRET: ${QR_SESSION_SECRET:-local-only-insecure-secret}
+      ADMIN_BOOTSTRAP_EMAIL: ${QR_ADMIN_EMAIL:-office@traveldoor.ge}
+      ADMIN_BOOTSTRAP_PASSWORD: ${QR_ADMIN_PASSWORD:-change-me-now-please}
+      # Imports the bundled Travel Door Georgia profile on start. Idempotent.
+      SEED_DEFAULT: ${QR_SEED_DEFAULT:-true}
+    volumes:
+      - data:/app/data
+      - uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  data:
+  uploads:

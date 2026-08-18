@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Title }}</title>
+{{ with .Profile }}
+<meta name="description" content="{{ if .Description }}{{ .Description }}{{ else }}{{ .Subtitle }}{{ end }}">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="{{ .Name }}">
+<meta property="og:description" content="{{ if .Description }}{{ .Description }}{{ else }}{{ .Subtitle }}{{ end }}">
+<meta property="og:url" content="{{ $.PublicURL }}">
+{{ if $.OGImage }}<meta property="og:image" content="{{ $.OGImage }}">{{ end }}
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="{{ $.PublicURL }}">
+{{ end }}
+<link rel="stylesheet" href="/static/css/app.css?v={{ .AssetVersion }}">
+<script src="/static/js/share.js?v={{ .AssetVersion }}" defer></script>
+</head>
+<body class="public">
+<main class="card">
+  {{ template "content" . }}
+</main>
+</body>
+</html>

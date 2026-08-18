@@ -1,0 +1,108 @@
+{{ define "content" }}
+{{ $p := .Profile }}
+<div class="page-head">
+  <h1>{{ $p.Name }}</h1>
+  <div class="actions">
+    <a class="button ghost" href="/{{ $p.Slug }}">View public page</a>
+    <a class="button ghost" href="/admin">Back</a>
+  </div>
+</div>
+
+{{ if .Notice }}<p class="notice" role="status">{{ .Notice }}</p>{{ end }}
+{{ if .Errors }}<ul class="error" role="alert">{{ range .Errors }}<li>{{ . }}</li>{{ end }}</ul>{{ end }}
+
+<section class="panel">
+  <h2>Publishing</h2>
+  <p>Status: {{ if $p.Published }}<span class="badge live">Published</span>{{ else }}<span class="badge">Draft</span>{{ end }}
+     — public URL <a href="{{ .PublicURL }}">{{ .PublicURL }}</a></p>
+  <form class="inline" method="post" action="/admin/profiles/{{ $p.ID }}/publish">
+    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+    <input type="hidden" name="published" value="{{ if $p.Published }}0{{ else }}1{{ end }}">
+    <button type="submit">{{ if $p.Published }}Unpublish{{ else }}Publish{{ end }}</button>
+  </form>
+</section>
+
+<section class="panel" id="qr">
+  <h2>QR code</h2>
+  <p class="hint">
+    The code encodes the canonical profile URL, so editing links, branding or
+    ordering never invalidates a printed code. It changes only if the slug or
+    <code>BASE_URL</code> changes.
+  </p>
+
+  <p class="qr-target">
+    Encodes: <strong>{{ .PublicURL }}</strong><br>
+    <span class="hint">Fingerprint {{ .QRVersion }} — a different value here means a different code.</span>
+  </p>
+
+  <div class="qr-row">
+    <img class="qr" src="/admin/profiles/{{ $p.ID }}/qr.svg?v={{ .QRVersion }}"
+         alt="QR code for {{ .PublicURL }}" width="220" height="220">
+
+    <div class="qr-downloads">
+      <p><a class="button" href="/admin/profiles/{{ $p.ID }}?t={{ .Now }}#qr">Generate / refresh code</a></p>
+
+      <h3>Vector — best for print</h3>
+      <ul class="downloads">
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.svg?download=1">SVG</a> — scales to any size</li>
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.pdf?download=1">PDF</a> — A4 sheet with the URL printed underneath</li>
+      </ul>
+
+      <h3>Raster — for web and social</h3>
+      <ul class="downloads">
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.png?download=1&amp;size=512">PNG 512px</a></li>
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.png?download=1&amp;size=1024">PNG 1024px</a></li>
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.png?download=1&amp;size=2048">PNG 2048px</a></li>
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.jpg?download=1&amp;size=1024">JPG 1024px</a> — only where PNG is refused</li>
+      </ul>
+
+      <h3>Also available</h3>
+      <ul class="downloads">
+        <li><a href="/{{ $p.Slug }}/contact.vcf">vCard preview</a></li>
+        <li><a href="/admin/profiles/{{ $p.ID }}/qr.pdf">Open the print sheet in a new tab</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Details</h2>
+  <form method="post" action="/admin/profiles/{{ $p.ID }}" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+    {{ template "profile_fields" . }}
+    <div class="field">
+      <label for="logo">Logo</label>
+      {{ if $p.LogoPath }}<img class="logo-preview" src="{{ $p.LogoPath }}" alt="Current logo" width="64" height="64">{{ end }}
+      <input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <p class="hint">PNG, JPEG, WebP or GIF, up to 2 MB.</p>
+      {{ if $p.LogoPath }}<label class="check"><input type="checkbox" name="remove_logo" value="1"> Remove the current logo</label>{{ end }}
+    </div>
+    <button type="submit">Save profile</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Links</h2>
+  {{ template "link_list" dict "ProfileID" $p.ID "Links" .Links "LinkTypes" .LinkTypes "CSRFToken" .CSRFToken "Error" "" }}
+</section>
+
+<section class="panel">
+  <h2>Analytics</h2>
+  <p>{{ .Stats.Views }} page views · {{ .Stats.Clicks }} link clicks (aggregate counts only; no visitor identifiers are stored).</p>
+  <table class="links-table">
+    <thead><tr><th scope="col">Link</th><th scope="col">Clicks</th></tr></thead>
+    <tbody>
+      {{ $stats := .Stats }}
+      {{ range .Links }}<tr><td>{{ .Label }}</td><td>{{ index $stats.PerLink .ID }}</td></tr>{{ end }}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel danger-zone">
+  <h2>Delete</h2>
+  <form method="post" action="/admin/profiles/{{ $p.ID }}/delete" data-confirm="Delete this profile and all its links?">
+    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+    <button class="danger" type="submit">Delete profile</button>
+  </form>
+</section>
+{{ end }}

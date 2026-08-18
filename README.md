@@ -129,12 +129,41 @@ credentials, and **change the password immediately** at
 read when no user exists, so it does nothing after the first boot — but leaving
 a known password on a public admin is the risk worth closing first.
 
-### Using the Compose service type instead
+### Deploying with the Compose service type
 
-`docker-compose.dokploy.yml` is ready for Dokploy's **Compose** type: no host
-port, attached to `dokploy-network`, with the Traefik labels for the domain
-already set. Provide `SESSION_SECRET` and `ADMIN_BOOTSTRAP_PASSWORD` as
-environment variables in the UI.
+`docker-compose.dokploy.yml` is written for this path: no host port, attached
+to the external `dokploy-network`, with the Traefik routers, the TLS resolver
+and the http-to-https redirect already declared for
+`qrcode.binomargroup.com`.
+
+1. **Create Service → Compose** in your Dokploy project, pointing at this
+   repository.
+2. Set the compose path to `docker-compose.dokploy.yml`.
+3. In the **Environment** tab set:
+
+   ```
+   SESSION_SECRET=<openssl rand -base64 32>
+   ADMIN_BOOTSTRAP_PASSWORD=<a strong first-run password>
+   ```
+
+   Both use compose's `${VAR:?message}` form, so a missing value aborts the
+   deploy with an explicit error rather than starting something insecure.
+   `ADMIN_BOOTSTRAP_EMAIL` is optional and defaults to `office@traveldoor.ge`.
+4. Deploy. Traefik picks up the labels; the certificate is issued on the first
+   https request, so the DNS record has to resolve first.
+
+The domain is baked into the compose file in two places — the two router rules
+and `BASE_URL`. To serve a different hostname, change all three together:
+`BASE_URL` is what the QR encodes, so a mismatch produces codes pointing at the
+wrong origin.
+
+Nothing in this file needs a Dokploy-side domain entry; the labels do the
+routing. If you prefer to add the domain in the Dokploy UI instead, drop the
+`labels:` block and let Dokploy generate its own.
+
+Verified locally against a stand-in `dokploy-network`: the stack builds, comes
+up healthy, seeds the profile, serves `https://qrcode.binomargroup.com` as its
+canonical URL, exposes no host port, and carries exactly the labels above.
 
 ### Redeploys and your data
 

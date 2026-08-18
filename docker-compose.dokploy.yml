@@ -1,0 +1,69 @@
+# Dokploy — "Compose" service type.
+#
+# Dokploy runs Traefik in front of every stack, so this file publishes no host
+# port: routing happens by domain over the shared external dokploy-network.
+# Set SESSION_SECRET and ADMIN_BOOTSTRAP_PASSWORD in Dokploy's Environment tab
+# before the first deploy; both use the `:?` form so a missing value fails the
+# deploy loudly instead of booting something insecure.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+    environment:
+      APP_ENV: production
+
+      # Must match the domain below exactly. Every QR encodes BASE_URL/{slug},
+      # so changing this invalidates codes that are already printed.
+      BASE_URL: https://qrcode.binomargroup.com
+
+      SESSION_SECRET: ${SESSION_SECRET:?generate with openssl rand -base64 32}
+
+      # Read only while no admin user exists. After the first boot, change the
+      # password at /admin/account instead.
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-office@traveldoor.ge}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:?set a strong first-run password}
+
+      # Seeds the bundled profile only when its slug is missing, so redeploys
+      # never discard links edited in the admin. Use "force" to re-import.
+      SEED_DEFAULT: "true"
+
+    # Without these, a redeploy starts from an empty database and loses the
+    # uploaded logo.
+    volumes:
+      - qr-data:/app/data
+      - qr-uploads:/app/uploads
+
+    networks:
+      - dokploy-network
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+
+      # HTTPS
+      - traefik.http.routers.qrprofile.rule=Host(`qrcode.binomargroup.com`)
+      - traefik.http.routers.qrprofile.entrypoints=websecure
+      - traefik.http.routers.qrprofile.tls=true
+      - traefik.http.routers.qrprofile.tls.certresolver=letsencrypt
+      - traefik.http.routers.qrprofile.service=qrprofile
+
+      # Plain http exists only to bounce visitors to https.
+      - traefik.http.routers.qrprofile-http.rule=Host(`qrcode.binomargroup.com`)
+      - traefik.http.routers.qrprofile-http.entrypoints=web
+      - traefik.http.routers.qrprofile-http.middlewares=qrprofile-redirect
+      - traefik.http.middlewares.qrprofile-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.qrprofile-redirect.redirectscheme.permanent=true
+
+      # The app listens on 8080 inside the container.
+      - traefik.http.services.qrprofile.loadbalancer.server.port=8080
+
+volumes:
+  qr-data:
+  qr-uploads:
+
+networks:
+  dokploy-network:
+    external: true
