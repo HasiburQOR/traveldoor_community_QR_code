@@ -3,7 +3,9 @@
 !/uploads/.gitkeep
 .env
 *.exe
-app
+# The compiled binary at the repo root only. An unanchored "app" would also
+# match the cmd/app package directory and quietly drop it from the repo.
+/app
 
 # Generated QR exports
 /qr/
