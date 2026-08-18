@@ -6,8 +6,9 @@
 services:
   app:
     build: .
-    image: qr-social-profile:local
-    container_name: qr-profile
+    # No fixed image tag or container_name: those are global to the Docker
+    # host, so a second project (another checkout, or a Dokploy deploy on the
+    # same machine) would collide with whatever is already running.
     ports:
       # Host 8090 by default because 8080 is often already taken.
       - "${QR_HOST_PORT:-8090}:8080"
